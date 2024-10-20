@@ -1,6 +1,6 @@
 (ns pold.core-test
   (:require [clojure.test :refer [deftest is testing]]
-            [pold.core :refer [pold-by partitioner part]]))
+            [pold.core :refer [pold partitioner part]]))
 
 (defonce ^:private flat-songs
   [{:artist "Aphex Twin" :album "On" :track 1 :title "On"}
@@ -60,18 +60,18 @@
          (fn [{:keys [title]}]
            title))))
 
-(deftest test-pold-by
+(deftest test-pold
   (testing "collection"
-    (let [result (pold-by (song-partitioner) flat-songs)]
+    (let [result (pold (song-partitioner) flat-songs)]
       (is (= nested-songs result))))
 
   (testing "transducer"
-    (let [result (eduction (pold-by (song-partitioner))
+    (let [result (eduction (pold (song-partitioner))
                            flat-songs)]
       (is (= nested-songs result))))
 
   (testing "transformation stack"
-    (let [[result] (eduction (comp (pold-by (song-partitioner))
+    (let [[result] (eduction (comp (pold (song-partitioner))
                                    (take 1))
                              flat-songs)]
       (is (= (first nested-songs) result)))))

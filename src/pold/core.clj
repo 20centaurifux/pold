@@ -90,7 +90,7 @@
   ([kf initf accf]
    [kf initf accf]))
 
-(defn pold-by
+(defn pold
   "Applies partitioner closure f to each value in coll. Returns a lazy seq of
    partitions. Returns a stateful transducer when no collection is provided."
   ([f]
@@ -117,8 +117,8 @@
     (if-let [s (seq coll)]
       (let [head (f (first s))]
         (if (anything? head)
-          (cons head (pold-by f (rest s)))
-          (pold-by f (rest s))))
+          (cons head (pold f (rest s)))
+          (pold f (rest s))))
       (let [v (f)]
         (when (anything? v)
           [v]))))))
