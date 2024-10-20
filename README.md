@@ -38,9 +38,9 @@ When no collection is provided **pold** returns a stateful transducer.
 
 ### Nested partitions
 
-As described in the example above, the **partitioner** function accepts a set
-of partition functions. This makes it possible to divide and accumulate data
-into any number of partitions.
+As described in the example above, **partitioner** accepts a set of partition
+functions. This makes it possible to divide and accumulate data into any number
+of partitions.
 
 In the example below, an ordered list of artists, albums, and songs is divided
 into three partitions, which are then transformed into a list of nested maps.
