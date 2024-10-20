@@ -1,44 +1,85 @@
 # pold
 
-FIXME: description
+**pold** (*partition* and *fold*) is a Clojure library for efficiently dividing
+data into any number of partitions and accumulating them into a result.
 
 ## Installation
 
-Download from http://example.com/FIXME.
+FIXME: installation
 
 ## Usage
 
-FIXME: explanation
+### Basic Example
 
-    $ java -jar pold-0.1.0-standalone.jar [args]
+**pold** applies a stateful partition and accumulation closure to each value of
+a collection. The closure can be built with **partitioner** which takes a set of
+partition functions.
 
-## Options
+Assume you want to partition numbers based on whether they are even or odd and
+return the sum of each partition. In this case, you could use **odd?** as key
+function. Whenever the key changes, a new partition is created. The first number
+of the partition is used as accumulator, which is initialized with **identity**.
+Each subsequent number is added to the accumulator, updating it.
 
-FIXME: listing of options this app accepts.
+```
+(require '[pold.core :refer [pold partitioner part]])
 
-## Examples
+(pold (partitioner (part odd? identity +))
+      [1 1 2 4 3 9]) ; returns (2 6 12)
+```
 
-...
+When no collection is provided **pold** returns a stateful transducer.
 
-### Bugs
+```
+(eduction (comp (pold (partitioner (part odd? identity +)))
+                (filter #(> % 2)))
+          [1 1 2 4 3 9]) ; returns (6 12)
+```
 
-...
+### Nested partitions
 
-### Any Other Sections
-### That You Think
-### Might be Useful
+As described in the example above, the **partitioner** function accepts a set
+of partition functions. This makes it possible to divide and accumulate data
+into any number of partitions.
 
-## License
+In the example below, an ordered list of artists, albums, and songs is divided
+into three partitions, which are then transformed into a list of nested maps.
 
-Copyright © 2024 FIXME
+```
+(def songs
+  [{:artist "Aphex Twin" :album "On" :track 1 :title "On"}
+   {:artist "Aphex Twin" :album "On" :track 2 :title "73-Yips"}
+   {:artist "Aphex Twin" :album "On" :track 3 :title "D-Scape"}
+   {:artist "Aphex Twin" :album "On" :track 4 :title "Xepha"}
+   {:artist "Aphex Twin" :album "Blackbox Life Recorder 21f / In a Room7 F760" :track 1 :title "Blackbox Life Recorder 21f"}
+   {:artist "Aphex Twin" :album "Blackbox Life Recorder 21f / In a Room7 F760" :track 2 :title "Zin2 Test5"}
+   {:artist "Aphex Twin" :album "Blackbox Life Recorder 21f / In a Room7 F760" :track 3 :title "In a Room7 F760"}
+   {:artist "Aphex Twin" :album "Blackbox Life Recorder 21f / In a Room7 F760" :track 4 :title "Blackbox Life Recorder 22 (Parallax mix)"}
+   {:artist "Squarepusher" :album "Welcome to Europe" :track 1 :title "Welcome to Europe"}
+   {:artist "Squarepusher" :album "Welcome to Europe" :track 2 :title "Hanningfield Window"}
+   {:artist "Squarepusher" :album "Welcome to Europe" :track 3 :title "Exciton"}
+   {:artist "Autechre" :album "Anti" :track 1 :title "Lost"}
+   {:artist "Autechre" :album "Anti" :track 2 :title "Djarum"}
+   {:artist "Autechre" :album "Anti" :track 3 :title "Flutter"}])
 
-This program and the accompanying materials are made available under the
-terms of the Eclipse Public License 2.0 which is available at
-http://www.eclipse.org/legal/epl-2.0.
+(defn- make-partitioner
+  []
+  (partitioner
+   (part :artist
+         (fn [{:keys [artist]}]
+           {:artist artist
+            :albums []})
+         #(update-in %1 [:albums] conj %2))
 
-This Source Code may also be made available under the following Secondary
-Licenses when the conditions for such availability set forth in the Eclipse
-Public License, v. 2.0 are satisfied: GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or (at your
-option) any later version, with the GNU Classpath Exception which is available
-at https://www.gnu.org/software/classpath/license.html.
+   (part :album
+         (fn [{:keys [album]}]
+           {:title album
+            :songs []})
+         #(update-in %1 [:songs] conj %2))
+
+   (part :track
+         (fn [{:keys [title]}]
+           title))))
+
+(pold (make-partitioner) songs)
+```
