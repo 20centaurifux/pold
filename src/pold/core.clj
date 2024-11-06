@@ -1,8 +1,7 @@
-(ns pold.core
-  (:gen-class))
+(ns pold.core)
 
 (defonce ^:private nothing ::nothing)
-(defonce ^:private nothing? (comp boolean #{nothing}))
+(defonce ^:private nothing? (comp some? #{nothing}))
 (defonce ^:private anything? (complement nothing?))
 
 (defn- partfn
