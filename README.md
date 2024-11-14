@@ -5,7 +5,9 @@ data into any number of partitions and accumulating them into a result.
 
 ## Installation
 
-FIXME: installation
+This library can be installed from Clojars:
+
+[![Clojars Project](https://img.shields.io/clojars/v/de.dixieflatline/pold.svg?include_prereleases)](https://clojars.org/de.dixieflatline/pold)
 
 ## Usage
 
@@ -25,7 +27,8 @@ Each subsequent number is added to the accumulator, updating it.
 (require '[pold.core :refer [pold partitioner part]])
 
 (pold (partitioner (part odd? identity +))
-      [1 1 2 4 3 9]) ; returns (2 6 12)
+      [1 1 2 4 3 9])
+      ; => (2 6 12)
 ```
 
 When no collection is provided **pold** returns a stateful transducer.
@@ -33,7 +36,8 @@ When no collection is provided **pold** returns a stateful transducer.
 ```
 (eduction (comp (pold (partitioner (part odd? identity +)))
                 (filter #(> % 2)))
-          [1 1 2 4 3 9]) ; returns (6 12)
+          [1 1 2 4 3 9])
+          ; => (6 12)
 ```
 
 ### Nested partitions
@@ -82,4 +86,5 @@ into three partitions, which are then transformed into a list of nested maps.
            title))))
 
 (pold (make-partitioner) songs)
+; => [{:artist "Aphex Twin", :albums [{:title "On" :songs ["On" ...
 ```
