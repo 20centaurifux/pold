@@ -74,13 +74,11 @@ into three partitions, which are then transformed into a list of nested maps.
            {:artist artist
             :albums []})
          #(update-in %1 [:albums] conj %2))
-
    (part :album
          (fn [{:keys [album]}]
            {:title album
             :songs []})
          #(update-in %1 [:songs] conj %2))
-
    (part :track
          (fn [{:keys [title]}]
            title))))
