@@ -1,4 +1,4 @@
-(defproject de.dixieflatline/pold "0.1.0-SNAPSHOT"
+(defproject de.dixieflatline/pold "0.1.0"
   :description "Partition and fold."
   :url "https://github.com/20centaurifux/pold"
   :license {:name "AGPLv3"
