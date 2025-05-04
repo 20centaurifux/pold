@@ -1,7 +1,11 @@
 (ns pold.core)
 
 (defonce ^:private nothing ::nothing)
-(defonce ^:private nothing? (comp some? #{nothing}))
+
+(defn- nothing?
+  [x]
+  (identical? x nothing))
+
 (defonce ^:private anything? (complement nothing?))
 
 (defn- partfn
@@ -60,11 +64,11 @@
 (defn partitioner
   "Takes a set of partition functions (kf :: input -> key,
    initf :: input -> accumulator, aggrf :: accumulator -> input -> accumulator)
-   and returns a stateful closure that is the composition of those fns.
+   and returns a stateful closure that is the composition of those functions.
    
    The closure is defined with 2 arities for different purposes:
    
-   Step (arity 1) - applies all key fns to input and splitting it each
+   Step (arity 1) - applies all key functions to input and splitting it each
    time a new value is returned. If a key changes an accumulator is created by
    applying initf to input. Otherwise the accumulator is updated
    by appyling aggrf. Returns accumulator of first partition if first key
@@ -80,10 +84,9 @@
 
 (defn part
   "Returns a vector of partition functions (kf :: input -> key,
-   initf :: input -> accumulator,
-   aggrf :: accumulator -> input -> accumulator). Adds a default aggregate
-   fn (aggrf :: accumulator -> input -> accumulator) to vector if no fn is
-   provided."
+   initf :: input -> accumulator, aggrf :: accumulator -> input -> accumulator).
+   Adds a default identity function for aggregation if no aggregation function
+   is given."
   ([kf aggrf]
    (part kf aggrf (fn [result _] result)))
   ([kf initf accf]
@@ -91,7 +94,7 @@
 
 (defn pold
   "Applies partitioner closure f to each value in coll. Returns a lazy seq of
-   partitions. Returns a stateful transducer when no collection is provided."
+   partitions. Returns a stateful transducer when no collection is given."
   ([f]
    (fn [rf]
      (let [f' (volatile! f)]
